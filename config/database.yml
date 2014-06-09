@@ -1,0 +1,11 @@
+defaults: &defaults
+  adapter: postgresql
+  encoding: unicode
+  schema_search_path: public
+  pool: 5
+  allow_concurrency: true
+
+
+development:
+  <<: *defaults
+  database: dcloud_crowd_development
