@@ -15,7 +15,7 @@ module Crowd
 
       get '/statistics' do
         content_type 'application/json'
-        Oj.dump(Spotter.statistics)
+        Oj.dump(Spotter.statistics.to_hash, mode: :compat)
       end
 
     end
