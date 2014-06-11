@@ -4,6 +4,8 @@ source 'https://rubygems.org'
 gemspec
 
 gem 'pg'
+gem 'sass'
+gem 'compass'
 
 group :development do
   gem 'puma'
