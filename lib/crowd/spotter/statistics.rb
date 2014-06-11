@@ -1,25 +1,21 @@
-require 'pry'
+require_relative 'buckets'
 module Crowd
   module Spotter
     class Statistics
 
       def initialize
-        @stats = []
+        @stats = Buckets.new
 
         Gather.supervise_as :gather
 
-        puts 'b4 history'
-        Celluloid::Actor[:gather].async.history(300,@stats)
-
-        puts 'af history'
-#every(1.minute){ @gatherer.gather! }
-
+        start_at = Time.now-86400 # 1 day
+        Celluloid::Actor[:gather].async.history(start_at,@stats)
       end
 
       def all
-        @stats
+        @stats.to_hash
       end
-    end
 
+    end
   end
 end
