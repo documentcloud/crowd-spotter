@@ -13,7 +13,6 @@ Totals = Struct.new(:completed, :started, :processing, :failures) do
 end
 
 
-
 class Buckets
 
   MINUTE_GRANULARITY = 5
@@ -23,7 +22,6 @@ class Buckets
   end
 
   def record(job)
-
     if job.complete?
       record = at(job.updated_at).completed!
       record.failures! if job.failed?
@@ -37,13 +35,14 @@ class Buckets
   end
 
   def between( start_time, end_time )
-    (start_time.to_i..end_time.to_i).step(60*MINUTE_GRANULARITY).each do | ts |
-      yield at(Time.at(ts))
+    current = start_time
+    loop do
+      yield at(current)
+      break if (current += MINUTE_GRANULARITY.minutes) > end_time
     end
   end
 
   def at(time)
-p time
     # Returns a integer version of year, month, day, and 5 minute segment number
     # i.e. 4:39 pm on 2014-06-09 will round down to nearest 5 minute segment, i.e. 2014060935
     ts = sprintf("%s%02d", time.strftime('%Y%m%d%H'), time.min.divmod( MINUTE_GRANULARITY ).first * MINUTE_GRANULARITY ).to_i
