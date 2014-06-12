@@ -45,7 +45,10 @@ class Buckets
   def at(time)
     # Returns a integer version of year, month, day, and 5 minute segment number
     # i.e. 4:39 pm on 2014-06-09 will round down to nearest 5 minute segment, i.e. 2014060935
-    ts = sprintf("%s%02d", time.strftime('%Y%m%d%H'), time.min.divmod( MINUTE_GRANULARITY ).first * MINUTE_GRANULARITY ).to_i
+    ts = sprintf("%s%02d",
+      time.strftime('%Y%m%d%H'),
+      time.min.divmod( MINUTE_GRANULARITY ).first * MINUTE_GRANULARITY
+    ).to_i
     @storage[ts]
   end
 
