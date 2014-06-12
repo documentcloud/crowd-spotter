@@ -24,7 +24,12 @@ module Crowd
 
       get '/statistics' do
         content_type 'application/json'
-        Oj.dump(Spotter.statistics.to_hash, mode: :compat)
+        Oj.dump(Spotter.statistics.all, mode: :compat)
+      end
+
+      get '/statistics/most-recent' do
+        content_type 'application/json'
+        Oj.dump(Spotter.statistics.most_recent, mode: :compat)
       end
 
       get '/css/:name.css' do

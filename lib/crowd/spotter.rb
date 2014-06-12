@@ -10,7 +10,7 @@ module Crowd
     end
 
     def self.statistics
-      @statistics.all
+      @statistics
     end
 
   end

@@ -55,20 +55,28 @@ Chart = {
   },
 
   boot: function(){
-    $('#zoom-out').click(_.bind(this.zoomOut,this));
+    _.bindAll(this,'zoomIn','zoomOut','fetchData','loadData');
+    $('#zoom-out').click(this.zoomOut);
     this.container = $('.graph');
-    this.container.bind("plotselected", _.bind(this.zoomIn,this));
+    this.container.bind("plotselected", this.zoomIn);
 
     // this.container.bind("plotunselected", function (event) {
     //   $("#selection").text("");
     // });
+    this.zooms=[];
+    var me =this;
+    this.fetchData('/statistics');
+  },
 
-    $.get('/statistics')
-      .done( _.bind(this.loadData,this) )
+  fetchData: function(url){
+    if ( ! url )
+      url = '/statistics/most-recent';
+    $.get(url)
+      .done( this.loadData )
       .fail( this.showError );
   },
 
-  loadData: function(rawdata){
+  processData: function(rawdata){
     var sets = {
       completed  :[],
       failures   :[],
@@ -90,17 +98,27 @@ Chart = {
         return event[0];
       });
     });
+    return sets;
+  },
 
-    var data = [
-      { label: "Completed",  data: sets.completed  },
-      { label: "Failures",   data: sets.failures   },
-      //{ label: "Processing", data: sets.processing },
-      { label: "Started",    data: sets.started    }
-    ];
-    console.dir(data);
-    this.plot = $.plot(this.container, data, this.options);
-    this.zooms=[];
-    this.processing = $.plot( $('.processing'), [{ label: "Processing", data: sets.processing }], this.options);
+  loadData: function(rawdata){
+    var sets = this.processData(rawdata);
+    if ( ! this.sets ){
+      this.sets = sets;
+    } else {
+      _.each(sets,function(value,key){
+        this.sets[key] = this.sets[key].concat( value );
+      },this);
+    }
+    this.plot = $.plot(this.container, [
+      { label: "Started",    data: this.sets.started    },
+      { label: "Completed",  data: this.sets.completed  },
+      { label: "Failures",   data: this.sets.failures   },
+      { label: "Processing", data: this.sets.processing }
+    ], this.options);
+
+    setTimeout(this.fetchData, 1000);
+
   }
 
 };
