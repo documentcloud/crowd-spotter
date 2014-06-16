@@ -1,70 +1,78 @@
-Chart = {
+function Chart(plots, options){
+  this.plots = plots;
+  for (var i = 0, l = this.plots.length; i < l; i++) {
+    this.plots[i].data = [];
+  }
+  this.options = _.clone(options);
+  // this.options.series = _.clone(chart_options.series);
+  //   this.options.series.color = options.color;
 
+  this.element = $('<div class="chart"></div>');
+}
+
+Chart.prototype.addData = function(data){
+  for (var i = 0, l = this.plots.length; i < l; i++) {
+    this.plots[i].data = this.plots[i].data.concat( data[i] );
+  }
+
+
+  this.draw();
+};
+
+Chart.prototype.plots = function(){
+  var ret = [];
+  for (i = 0, l = this.plots.length; i < l; i++) {
+    var plot = this.plots[i];
+  }
+};
+  
+  
+Chart.prototype.draw = function(){
+  this.plot = $.plot(this.element, this.plots, this.options);
+};
+
+
+Charts = {
   options: {
     series: {
       lines: {
         show: true
-      }//,
-      // points: {
-      //   show: true
-      // }
-    },
-    legend: {
-      noColumns: 2
+      }
     },
     xaxis: {
-      tickSize: [6,"hour"],
+      tickSize: [8,"hour"],
       mode: "time"
     },
     yaxis: {
-      min: 0,
-      transform: function (v) {
-        return v == 0 ? v : Math.log(v);
-      },
     },
     selection: {
       mode: "x"
     }
   },
 
-  zoomIn: function(event, ranges) {
+  chart_plots: [
+    [
+      { key: 'completed',  label: 'Completed', color: "#edc240" },
+      { key: 'failures',   label: 'Failures',  color: "#afd8f8" },
+      { key: 'started',    label: 'Started',   color: "#4da74d" }
+    ],[
+      { key: 'processing', label: 'Processing',color: "#cb4b4b" }
+    ]
+  ],
 
-    this.zooms.push({ min: this.plot.getAxes().xaxis.min, max: this.plot.getAxes().xaxis.max });
-
-    $.each(this.plot.getXAxes(), function(_, axis) {
-      axis.options.min = ranges.xaxis.from;
-      axis.options.max = ranges.xaxis.to;
-    });
-    this.redraw();
-  },
-
-  zoomOut: function(){
-    var zoom = this.zooms.pop();
-    if ( ! zoom ) return;
-    $.each(this.plot.getXAxes(), function(_, axis) {
-      axis.options.min = zoom.min;
-      axis.options.max = zoom.max;
-    });
-    this.redraw();
-  },
-
-  redraw: function(){
-    this.plot.setupGrid();
-    this.plot.draw();
-    this.plot.clearSelection();
-  },
+  charts: [],
 
   boot: function(){
-    _.bindAll(this,'zoomIn','zoomOut','fetchData','loadData');
-    $('#zoom-out').click(this.zoomOut);
-    this.container = $('.graph');
-    this.container.bind("plotselected", this.zoomIn);
+    _.bindAll(this,'fetchData','loadData');
+    this.container = $('.charts');
 
-    // this.container.bind("plotunselected", function (event) {
-    //   $("#selection").text("");
-    // });
-    this.zooms=[];
-    var me =this;
+//    $.get("http://api.uptimerobot.com/getMonitors?apiKey=m776152683-48dd47ea1fca7d9a96c7d64b&logs=1&alertContacts=1&responseTimes=1&responseTimesAverage=180&monitors=15830-32696&format=json")
+
+    for (var i = 0, l = this.chart_plots.length; i < l; i++) {
+      var chart = new Chart(this.chart_plots[i], this.options);
+      this.charts.push(chart);
+      this.container.append( chart.element );
+    }
     this.fetchData('/statistics');
   },
 
@@ -102,20 +110,16 @@ Chart = {
   },
 
   loadData: function(rawdata){
+
     var sets = this.processData(rawdata);
-    if ( ! this.sets ){
-      this.sets = sets;
-    } else {
-      _.each(sets,function(value,key){
-        this.sets[key] = this.sets[key].concat( value );
-      },this);
+    for (var ci = 0, l = this.charts.length; ci < l; ci++) {
+      var chart = this.charts[ci],
+           data = [];
+      for (var i = 0, l = chart.plots.length; i < l; i++) {
+        data.push(sets[chart.plots[i].key]);
+      }
+      chart.addData(data);
     }
-    this.plot = $.plot(this.container, [
-      { label: "Started",    data: this.sets.started    },
-      { label: "Completed",  data: this.sets.completed  },
-      { label: "Failures",   data: this.sets.failures   },
-      { label: "Processing", data: this.sets.processing }
-    ], this.options);
 
     setTimeout(this.fetchData, 1000);
 
@@ -124,5 +128,5 @@ Chart = {
 };
 
 $(function() {
-  Chart.boot();
+  Charts.boot();
 });

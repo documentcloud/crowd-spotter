@@ -1,8 +1,22 @@
 body {
-  .graph {
-    min-height: 350px;
-  }
-  .processing {
-    min-height: 250px;
+  .charts {
+    .chart {
+      min-height: 250px;
+    }
+    td.legendColorBox {
+      width: 14px;
+    }
+    .legend table {
+      background-color: white;
+      border: 2px solid grey;
+      border-radius: 4px;
+      box-shadow: 3px 3px 3px 2px lightgray;
+      .scale {
+        label {
+          margin-left: -5px;
+        }
+      }
+    }
+    
   }
 }
