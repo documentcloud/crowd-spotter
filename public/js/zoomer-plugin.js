@@ -1,5 +1,5 @@
 // A plugin for Flot that handles selection based zooming
-// 
+// and toggles logarithmic display on the Y scale
 (function ($) {
 
   function init(plot) {
@@ -35,16 +35,29 @@
   }
 
   function toggleScale(plot){
-//    var scale = plot.getPlaceholder().find('td.scale');
-
     plot.logarithmic = ! plot.logarithmic;
-    console.log( "toggle: " + plot.logarithmic );
     plot.getAxes().yaxis.options.transform = plot.logarithmic ? scaleLogarithmic : undefined;
     redraw(plot);
   }
 
   function zoomIn(plot,ranges){
-    plot.zooms.push({ min: plot.getAxes().xaxis.min, max: plot.getAxes().xaxis.max });
+    var axis = plot.getAxes();
+    plot.zooms.push({ xmin: axis.xaxis.min, xmax: axis.xaxis.max, ymin: axis.yaxis.min, ymax: axis.yaxis.max });
+    $.each(plot.getYAxes(), function(_, axis) {
+      var ymin, ymax;
+      $.each(plot.getData(), function (e, val) {
+        $.each(val.data, function (e1, val1) {
+
+          if ((val1[0] >= ranges.xaxis.from) && (val1[0] <= ranges.xaxis.to)) {
+            if (ymax == null || val1[1] > ymax) ymax = val1[1];
+            if (ymin == null || val1[1] < ymin) ymin = val1[1];
+          }
+        });
+      });
+      axis.options.min = ymin;
+      axis.options.max = ymax;
+    });
+
     $.each(plot.getXAxes(), function(_, axis) {
       axis.options.min = ranges.xaxis.from;
       axis.options.max = ranges.xaxis.to;
@@ -55,10 +68,11 @@
   function zoomOut(plot){
     var zoom = plot.zooms.pop();
     if ( ! zoom ) return;
-    $.each(plot.getXAxes(), function(_, axis) {
-      axis.options.min = zoom.min;
-      axis.options.max = zoom.max;
-    });
+    var axis = plot.getAxes();
+    axis.xaxis.options.min = zoom.xmin;
+    axis.xaxis.options.max = zoom.xmax;
+    axis.yaxis.options.min = zoom.ymin;
+    axis.yaxis.options.max = zoom.ymax;
     redraw(plot);
   }
 

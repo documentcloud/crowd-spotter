@@ -1,5 +1,32 @@
 body {
   .charts {
+    position: relative;
+    .error {
+      display: none;
+      h1{
+        color: red;
+        background-color: white;
+        display: inline-block;
+        padding: 20px;
+        border: 2px solid grey;
+        border-radius: 8px;
+        button {
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+        }
+      }
+      text-align: center;
+      z-index: 2;
+      position: absolute;
+      background: rgba(0, 0, 0, 0.6);
+      height: 100%;
+      position: absolute;
+      width: 100%;
+      button {
+        
+      }
+    }
     .chart {
       min-height: 250px;
     }

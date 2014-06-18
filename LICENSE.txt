@@ -1,4 +1,4 @@
-Copyright (c) 2014 Nathan Stitt
+Copyright (c) 2014 DocumentCloud
 
 MIT License
 

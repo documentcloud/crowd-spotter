@@ -1,3 +1,5 @@
+require 'pry'
+
 Totals = Struct.new(:completed, :started, :processing, :failures) do
   def self.create
      self.new 0, 0, 0, 0
@@ -15,10 +17,19 @@ end
 
 class Buckets
 
-  MINUTE_GRANULARITY = 5
-
   def initialize
-    @storage = Hash.new{ | h, segment | h[segment] = Totals.create }
+    @uptime  = []
+    @latency = []
+    @cc = Hash.new{ | h, segment | h[segment] = Totals.create }
+  end
+
+  def uptime_ts( string )
+    Time.strptime(string,'%m/%d/%Y %H:%M:%S').to_i * 1000
+  end
+
+  def record_uptime(uptime)
+    @uptime  = uptime['log'].map{ | event| [ uptime_ts(event['datetime']), event['type']=='2' ] }.sort_by(&:first)
+    @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
   end
 
   def record(job)
@@ -38,30 +49,43 @@ class Buckets
     current = start_time
     loop do
       yield at(current)
-      break if (current += MINUTE_GRANULARITY.minutes) > end_time
+      break if (current += Crowd::Spotter::MINUTE_GRANULARITY.minutes) > end_time
     end
   end
 
   def ts_for(time)
     sprintf("%s%02d",
       time.strftime('%Y%m%d%H'),
-      time.min.divmod( MINUTE_GRANULARITY ).first * MINUTE_GRANULARITY
+      time.min.divmod( Crowd::Spotter::MINUTE_GRANULARITY ).first * Crowd::Spotter::MINUTE_GRANULARITY
     ).to_i
   end
 
   def at(time)
     # Returns a integer version of year, month, day, and 5 minute segment number
     # i.e. 4:39 pm on 2014-06-09 will round down to nearest 5 minute segment, i.e. 201406091635
-    @storage[ts_for(time)]
+    @cc[ts_for(time)]
+  end
+
+  def for_dashboard( stats )
+    stats.each_with_object({completed:[], started:[], processing:[], failures:[]}) do | kv, hash |
+      ts =  Time.parse(kv.first.to_s).to_i * 1000
+      kv.last.to_h.each{ |key,count| hash[key].push([ts,count]) }
+    end
   end
 
   def all
-    @storage
+    for_dashboard(@cc).merge({
+      'uptime' => @uptime,
+      'latency' => @latency,
+    })
   end
 
   def most_recent
     ts = ts_for(Time.now)
-    { ts => @storage[ts] }
+    for_dashboard( Hash[ts, @cc[ts]] ).merge({
+      'uptime' => @uptime.last,
+      'latency' => @latency.last
+    })
   end
 
 end

@@ -4,6 +4,7 @@ require_relative "spotter/statistics"
 
 module Crowd
   module Spotter
+    MINUTE_GRANULARITY = 5
 
     def self.startup
       @statistics = Statistics.new
@@ -11,6 +12,10 @@ module Crowd
 
     def self.statistics
       @statistics
+    end
+
+    def self.configuration
+      @configuration ||= YAML.load(ERB.new(File.read("./config/config.yml")).result)
     end
 
   end

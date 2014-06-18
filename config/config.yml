@@ -1,0 +1,13 @@
+
+database: 
+  adapter: postgresql
+  encoding: unicode
+  schema_search_path: public
+  pool: 5
+  allow_concurrency: true
+  database: dcloud_crowd_development
+
+
+uptime: 
+  apiKey: m776152683-48dd47ea1fca7d9a96c7d64b
+  monitorId: 776152683
