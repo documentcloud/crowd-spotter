@@ -1,11 +1,8 @@
 function Chart( options ){
-    //.plots, _.extend(this.options,this.chart_plots[i].options
   _.extend(this,options);
   for (var i = 0, l = this.plots.length; i < l; i++) {
     this.plots[i].data = [];
   }
-//  this.options = _.clone(options);
-  //this.element = $('<div class="chart"></div>');
 }
 
 Chart.prototype.addData = function(data){
@@ -38,6 +35,10 @@ Charts = {
         show: true
       }
     },
+    grid: {
+      hoverable: true,
+      clickable: true
+    },
     xaxis: {
       mode: "time",
       timezone: "browser",
@@ -64,11 +65,6 @@ Charts = {
         { key: 'processing', label: 'Processing',color: "#cb4b4b" }
       ]
     },{
-      id: 'latency',
-      plots:[
-        { key: 'latency', label: 'Latency',color: "#FF7E00" }
-      ]
-    },{
       id: 'uptime',
       plots:[
         { key: 'uptime', label: 'Uptime',color: "#5D8AA8", steps: true }
@@ -83,7 +79,13 @@ Charts = {
         xaxis: {
           mode: "time"
         }
-
+      },
+      getLabel: function(date,y){
+        if (y){
+          return date + " UP";
+        } else {
+          return date + " DOWN";
+        }
       }
 
     }
@@ -93,7 +95,7 @@ Charts = {
   charts: [],
 
   boot: function(){
-    _.bindAll(this,'fetchData','loadData','showError','fetchData','redraw');
+    _.bindAll(this,'fetchData','loadData','showError','fetchData','redraw','showTooltip');
     this.container = $('.charts');
     this.container.on('click','button.retry', this.fetchData);
 
@@ -112,12 +114,44 @@ Charts = {
     }
     this.fetchData('/statistics');
     $(window).on('resize', _.debounce(this.redraw,300) );
+    $("<div id='tooltip'></div>").css({
+      position: "absolute",
+      display: "none",
+      border: "1px solid #fdd",
+      padding: "2px",
+      "background-color": "#fee",
+      opacity: 0.80
+    }).appendTo("body");
+
+    $("body").on('plothover', this.showTooltip);
   },
+
+  showTooltip: function (event, pos, item) {
+    if (item) {
+      var date = $.plot.formatDate(new Date(item.datapoint[0]),"%b %d %l:%M%p"),
+          y = item.datapoint[1],
+          chart = $(event.target),
+          label = y + " " + item.series.label + " on " + date;
+      for (var ci = 0, cl = this.charts.length; ci < cl; ci++) {
+        if ( chart.hasClass(this.charts[ci].id) && _.isFunction(this.charts[ci].getLabel) ){
+          label = this.charts[ci].getLabel(date,y);
+          break;
+        }
+      }
+      $("#tooltip").html(label)
+        .css({top: item.pageY+5, left: item.pageX+5})
+        .fadeIn(200);
+    } else {
+      $("#tooltip").hide();
+    }
+  },
+
   redraw: function(){
     for (var ci = 0, cl = this.charts.length; ci < cl; ci++) {
       this.charts[ci].draw();
     }
   },
+
   fetchData: function(url){
     if ( !_.isString(url) )
       url = '/statistics/most-recent';
@@ -130,8 +164,7 @@ Charts = {
     this.container.find('.error').show();
   },
 
-  loadData: function(rawdata){
-    var sets = rawdata;
+  loadData: function(sets){
     for (var ci = 0, cl = this.charts.length; ci < cl; ci++) {
       var chart = this.charts[ci],
            data = [];
