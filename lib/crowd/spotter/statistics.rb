@@ -8,7 +8,7 @@ module Crowd
 
         Gather.supervise_as :gather
 
-        start_at = Time.now-(86400*3) # 86400 = 1 day
+        start_at = Time.now-(86400*1) # 86400 = 1 day
         Celluloid::Actor[:gather].async.history(start_at,@buckets)
       end
 
