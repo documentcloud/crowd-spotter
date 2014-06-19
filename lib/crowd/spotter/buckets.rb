@@ -30,6 +30,7 @@ class Buckets
   def record_uptime(uptime)
     @uptime_percentages = uptime['customuptimeratio'].split('-')
     @uptime  = uptime['log'].map{ | event| [ uptime_ts(event['datetime']), event['type']=='2' ] }.sort_by(&:first)
+    @uptime.push( [Time.now.utc.to_i * 1000, uptime['status']==2] )
     @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
   end
 
