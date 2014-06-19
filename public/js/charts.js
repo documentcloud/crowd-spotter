@@ -114,14 +114,6 @@ Charts = {
     }
     this.fetchData('/statistics');
     $(window).on('resize', _.debounce(this.redraw,300) );
-    $("<div id='tooltip'></div>").css({
-      position: "absolute",
-      display: "none",
-      border: "1px solid #fdd",
-      padding: "2px",
-      "background-color": "#fee",
-      opacity: 0.80
-    }).appendTo("body");
 
     $("body").on('plothover', this.showTooltip);
   },
@@ -138,11 +130,11 @@ Charts = {
           break;
         }
       }
-      $("#tooltip").html(label)
+      $(".tooltip").html(label)
         .css({top: item.pageY+5, left: item.pageX+5})
         .fadeIn(200);
     } else {
-      $("#tooltip").hide();
+      $(".tooltip").hide();
     }
   },
 
