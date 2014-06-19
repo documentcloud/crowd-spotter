@@ -1,0 +1,11 @@
+javascript_compressor: closure
+
+javascripts:
+  status:
+    - public/js/vendor/jquery.js
+    - public/js/vendor/underscore.js
+    - public/js/vendor/jquery.flot.js
+    - public/js/vendor/jquery.flot.time.js
+    - public/js/vendor/jquery.flot.selection.js
+    - public/js/charts.js
+    - public/js/zoomer-plugin.js
