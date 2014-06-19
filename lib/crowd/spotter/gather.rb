@@ -41,7 +41,7 @@ module Crowd
 
         puts "History is available"
         last_run = Time.now
-        every( 20 ) do #Crowd::Spotter::MINUTE_GRANULARITY * 60) do
+        every( Crowd::Spotter::MINUTE_GRANULARITY * 60) do
           started_at = Time.now
           count = record_stats_since(last_run)
           puts "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
