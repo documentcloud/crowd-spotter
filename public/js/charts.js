@@ -42,7 +42,7 @@ Charts = {
     xaxis: {
       mode: "time",
       timezone: "browser",
-      timeformat: "%b %d %h:%M%p"
+      timeformat: "%b %d %l:%M%p"
     },
     yaxis: {
     },

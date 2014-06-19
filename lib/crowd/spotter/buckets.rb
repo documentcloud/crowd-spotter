@@ -69,7 +69,7 @@ class Buckets
 
   def for_dashboard( stats )
     stats.each_with_object({completed:[], started:[], processing:[], failures:[]}) do | kv, hash |
-      ts =  Time.parse(kv.first.to_s).to_i * 1000
+      ts =  DateTime.strptime(kv.first.to_s,'%Y%m%d%H%M').to_i * 1000
       kv.last.to_h.each{ |key,count| hash[key].push([ts,count]) }
     end
   end
