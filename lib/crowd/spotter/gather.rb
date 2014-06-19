@@ -43,7 +43,7 @@ module Crowd
 
       def record_stats_since(start_at)
         config = Spotter.configuration['uptime']
-        url = "http://api.uptimerobot.com/getMonitors?monitors=#{config['monitorId']}&apiKey=#{config['apiKey']}&logs=1&responseTimes=1&responseTimesAverage=30&customUptimeRatio=7-30-45&noJsonCallback=1&format=json"
+        url = "http://api.uptimerobot.com/getMonitors?monitors=#{config['monitorId']}&apiKey=#{config['apiKey']}&logs=1&responseTimes=1&responseTimesAverage=30&customUptimeRatio=7-30&noJsonCallback=1&format=json"
         uptime = Oj.load open( url ).read
         @buckets.record_uptime( uptime['monitors']['monitor'].first )
 

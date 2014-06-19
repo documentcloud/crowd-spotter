@@ -141,6 +141,8 @@ Charts = {
       chart.addData(data);
     }
     this.container.find('.error').hide();
+    this.container.find('.uptime_percentages .7').html(sets.uptime_percentages[0]);
+    this.container.find('.uptime_percentages .30').html(sets.uptime_percentages[1]);
 
     setTimeout(this.fetchData, 60000);
 

@@ -28,6 +28,7 @@ class Buckets
   end
 
   def record_uptime(uptime)
+    @uptime_percentages = uptime['customuptimeratio'].split('-')
     @uptime  = uptime['log'].map{ | event| [ uptime_ts(event['datetime']), event['type']=='2' ] }.sort_by(&:first)
     @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
   end
@@ -76,6 +77,7 @@ class Buckets
   def all
     for_dashboard(@cc).merge({
       'uptime' => @uptime,
+      'uptime_percentages' => @uptime_percentages,
       'latency' => @latency,
     })
   end
@@ -84,6 +86,7 @@ class Buckets
     ts = ts_for(Time.now)
     for_dashboard( Hash[ts, @cc[ts]] ).merge({
       'uptime' => @uptime.last,
+      'uptime_percentages' => @uptime_percentages,
       'latency' => @latency.last
     })
   end
