@@ -179,7 +179,7 @@ Charts = {
     }
     var last = sets.processing[sets.processing.length-1];
     if ( last ) this.favicon.badge( last[1] );
-    setTimeout(this.fetchData, 60000);
+    setTimeout(this.fetchData, 5 * 60 * 1000);
 
   }
 
