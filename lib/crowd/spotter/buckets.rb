@@ -34,7 +34,7 @@ class Buckets
     @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
   end
 
-  def record(job)
+  def record_history_on(job)
     if job.complete?
       record = at(job.updated_at).completed!
       record.failures! if job.failed?
@@ -52,6 +52,20 @@ class Buckets
     loop do
       yield at(current)
       break if (current += Crowd::Spotter::MINUTE_GRANULARITY.minutes) > end_time
+    end
+  end
+
+  def record_latest(job,start_at)
+    # record only if it's freshly created
+    if job.created_at > start_at
+      at(job.created_at).started!
+    end
+
+    if job.complete?
+      record = at(job.updated_at).completed!
+      record.failures! if job.failed?
+    else
+      at(Time.now).processing!
     end
   end
 

@@ -33,11 +33,15 @@ module Crowd
           end
         end
 
-        self.record_stats_since(start_at)
+        with_connection do
+          CloudCrowd::Job.where("updated_at>?", start_at).order(:updated_at).find_each do | job |
+            @buckets.record_history_on(job)
+          end
+        end
 
         puts "History is available"
         last_run = Time.now
-        every( 60 ) do # Crowd::Spotter::MINUTE_GRANULARITY * 60
+        every( 20 ) do #Crowd::Spotter::MINUTE_GRANULARITY * 60) do
           started_at = Time.now
           count = record_stats_since(last_run)
           puts "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
@@ -53,9 +57,9 @@ module Crowd
         @buckets.record_uptime( uptime['monitors']['monitor'].first )
         count = 0
         with_connection do
-          CloudCrowd::Job.where("updated_at>?", start_at).limit(10).order(:updated_at).find_each do | job |
+          CloudCrowd::Job.where("status = 1 or updated_at>?", start_at).order(:updated_at).find_each do | job |
             # We subdivide every hour into 5 minute segments
-            @buckets.record(job)
+            @buckets.record_latest(job,start_at)
             count +=1
           end
         end
