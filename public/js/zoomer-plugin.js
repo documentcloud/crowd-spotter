@@ -54,8 +54,8 @@
           }
         });
       });
-      axis.options.min = ymin;
-      axis.options.max = ymax;
+      axis.options.min = ymin * 1.1;
+      axis.options.max = ymax * 1.1;
     });
 
     $.each(plot.getXAxes(), function(_, axis) {
