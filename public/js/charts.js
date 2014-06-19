@@ -95,7 +95,7 @@ Charts = {
   charts: [],
 
   boot: function(){
-    _.bindAll(this,'fetchData','loadData','showError','fetchData','redraw','showTooltip');
+    _.bindAll(this,'fetchData','loadData','showError','fetchData','redraw','toolTip');
     this.container = $('.charts');
     this.container.on('click','button.retry', this.fetchData);
 
@@ -114,11 +114,11 @@ Charts = {
     }
     this.fetchData('/statistics');
     $(window).on('resize', _.debounce(this.redraw,300) );
-    this.favicon = new Favico({animation:'popFade', position: 'leftup'});
-    $("body").on('plothover', this.showTooltip);
+    this.favicon = new Favico({animation:'popFade'});
+    $("body").on('plothover', this.toolTip);
   },
 
-  showTooltip: function (event, pos, item) {
+  toolTip: function (event, pos, item) {
     if (item) {
       var date = $.plot.formatDate(new Date(item.datapoint[0]),"%b %d %l:%M%p"),
           y = item.datapoint[1],
@@ -130,8 +130,15 @@ Charts = {
           break;
         }
       }
+      var position = { top: item.pageY-25 },
+          page_width = $(document).width();
+      if ( page_width - 300 < item.pageX ){
+        _.extend(position,{ right: page_width - item.pageX + 5, left: 'auto'});
+      } else {
+        _.extend(position,{ left: item.pageX+5,  right: 'auto'});
+      }
       $(".tooltip").html(label)
-        .css({top: item.pageY+5, left: item.pageX+5})
+        .css(position)
         .fadeIn(200);
     } else {
       $(".tooltip").hide();
@@ -170,7 +177,8 @@ Charts = {
       this.container.find('.uptime_percentages .7').html(sets.uptime_percentages[0]);
       this.container.find('.uptime_percentages .30').html(sets.uptime_percentages[1]);
     }
-    this.favicon.badge( sets.processing[sets.processing.length-1][1] );
+    var last = sets.processing[sets.processing.length-1];
+    if ( last ) this.favicon.badge( last[1] );
     setTimeout(this.fetchData, 60000);
 
   }
