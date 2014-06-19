@@ -12,6 +12,7 @@ module Crowd
     class Application < Sinatra::Base
 
       register Jammit
+      production_env = ENV["RACK_ENV"]=="production"
 
       configure do
         set :root, Pathname.new(__FILE__).dirname.join('../../../')
@@ -20,7 +21,6 @@ module Crowd
         Compass.configuration do |config|
           config.project_path = root
         end
-        Jammit.set_package_assets( ENV["RACK_ENV"]=="production" )
       end
 
       helpers do
@@ -34,6 +34,7 @@ module Crowd
       end
 
       get '/' do
+        Jammit.set_package_assets( production_env )
         erb :index
       end
 
