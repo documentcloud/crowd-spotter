@@ -23,10 +23,14 @@ module Crowd
 
         @buckets = buckets
 
-        # FIXME - REMOVE WHEN LEAVING DEVELOPMENT.
-        # A plpgsql function is used so that there's no chance it will be available on production
-        with_connection do
-          CloudCrowd::Job.connection.execute 'select update_job_dates_func()'
+        # This is a hack postgresql function that moves job created_at/updated_at dates
+        # to the future in order to provide "fresh" data for development.
+        # It's implemented as a plpgsql function so there's no chance it'll be
+        # available on production
+        if ENV["RACK_ENV"]=="development"
+          with_connection do
+            CloudCrowd::Job.connection.execute 'select update_job_dates_func()'
+          end
         end
 
         self.record_stats_since(start_at)
@@ -43,10 +47,10 @@ module Crowd
 
       def record_stats_since(start_at)
         config = Spotter.configuration['uptime']
-        url = "http://api.uptimerobot.com/getMonitors?monitors=#{config['monitorId']}&apiKey=#{config['apiKey']}&logs=1&responseTimes=1&responseTimesAverage=30&customUptimeRatio=7-30&noJsonCallback=1&format=json"
+        url = "http://api.uptimerobot.com/getMonitors?monitors=#{config['monitorId']}&apiKey=#{config['apiKey']}" +
+              "&logs=1&responseTimes=1&responseTimesAverage=30&customUptimeRatio=7-30&noJsonCallback=1&format=json"
         uptime = Oj.load open( url ).read
         @buckets.record_uptime( uptime['monitors']['monitor'].first )
-
         with_connection do
           CloudCrowd::Job.where("updated_at>? and created_at<=now()", start_at).limit(10).order(:updated_at).find_each do | job |
             # We subdivide every hour into 5 minute segments
