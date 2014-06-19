@@ -114,7 +114,7 @@ Charts = {
     }
     this.fetchData('/statistics');
     $(window).on('resize', _.debounce(this.redraw,300) );
-
+    this.favicon = new Favico({animation:'popFade', position: 'leftup'});
     $("body").on('plothover', this.showTooltip);
   },
 
@@ -170,6 +170,7 @@ Charts = {
       this.container.find('.uptime_percentages .7').html(sets.uptime_percentages[0]);
       this.container.find('.uptime_percentages .30').html(sets.uptime_percentages[1]);
     }
+    this.favicon.badge( sets.processing[sets.processing.length-1][1] );
     setTimeout(this.fetchData, 60000);
 
   }
