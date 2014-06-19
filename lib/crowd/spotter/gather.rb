@@ -33,6 +33,7 @@ module Crowd
           end
         end
 
+        last_run = Time.now
         with_connection do
           CloudCrowd::Job.where("updated_at>?", start_at).order(:updated_at).find_each do | job |
             @buckets.record_history_on(job)
@@ -40,7 +41,9 @@ module Crowd
         end
 
         puts "History is available"
-        last_run = Time.now
+
+        record_stats_since(last_run)
+
         every( Crowd::Spotter::MINUTE_GRANULARITY * 60) do
           started_at = Time.now
           count = record_stats_since(last_run)
