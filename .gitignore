@@ -1,5 +1,6 @@
 .sass-cache
 config/config.yml
+public/assets
 *.gem
 *.rbc
 .bundle
