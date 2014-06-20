@@ -65,7 +65,7 @@ module Crowd
         @buckets.record_uptime( uptime['monitors']['monitor'].first )
         count = 0
         with_connection do
-          CloudCrowd::Job.where("status = 1 or updated_at>?", start_at).order(:updated_at).find_each do | job |
+          CloudCrowd::Job.where("status in (?) or updated_at>?", CloudCrowd::INCOMPLETE, start_at).order(:updated_at).find_each do | job |
             # We subdivide every hour into 5 minute segments
             @buckets.record_latest(job,start_at)
             count +=1
