@@ -44,8 +44,6 @@ Status = {
       timezone: "browser",
       timeformat: "%b %d %l:%M%p"
     },
-    yaxis: {
-    },
     selection: {
       mode: "x"
     }
@@ -94,6 +92,7 @@ Status = {
   },
 
   toolTip: function (event, pos, item) {
+
     if (item) {
       var date = $.plot.formatDate(new Date(item.datapoint[0]),"%b %d %l:%M%p"),
           y = item.datapoint[1],

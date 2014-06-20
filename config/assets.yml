@@ -8,5 +8,5 @@ javascripts:
     - public/js/vendor/jquery.flot.time.js
     - public/js/vendor/jquery.flot.selection.js
     - public/js/favico.js
-    - public/js/charts.js
+    - public/js/status.js
     - public/js/zoomer-plugin.js
