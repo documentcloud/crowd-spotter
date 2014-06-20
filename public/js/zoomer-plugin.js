@@ -23,8 +23,8 @@
     this.data        = this.$el.data();
     this.zooms       = [];
     this.logarithmic = false;
-    this.controls = $("<tr><td class='scale' colspan='2'><label><input type='checkbox'>Logarithmic</label></td></tr> \
-                      <tr><td class='zoom' colspan='2'><button>Zoom Out</button></td></tr>" );
+    this.controls = $("<tr><td class='scale' colspan='2'><label><input type='checkbox'>Logarithmic</label></td></tr>" +
+                      "<tr><td class='zoom' colspan='2'><button>Zoom Out</button></td></tr>" );
     _.bindAll(this,'zoomIn','zoomOut','toggleScale');
     placholder
       .on("plotselected",          this.zoomIn )
