@@ -137,23 +137,22 @@ Status = {
     this.charts_container.find('.error').show();
   },
 
-  loadData: function(sets){
+  loadData: function(stats){
     for (var ci = 0, cl = this.charts.length; ci < cl; ci++) {
       var chart = this.charts[ci],
            data = [];
       for (var i = 0, l = chart.plots.length; i < l; i++) {
-        data.push(sets[chart.plots[i].key]);
+        data.push(stats[chart.plots[i].key]);
       }
       chart.addData(data);
     }
     this.charts_container.find('.error').hide();
-    if ( sets.uptime_percentages ) {
-      var available = sets.uptime[ sets.uptime.length-1 ][1];
-      $('.uptimes .current').html( available ? "available" : "unavailable" );
-      $('.uptimes .week').html(sets.uptime_percentages[0]);
-      $('.uptimes .month').html(sets.uptime_percentages[1]);
+    if ( stats.uptime_percentages ) {
+      $('.uptimes .current').html( stats.available ? "available" : "unavailable" );
+      $('.uptimes .week').html(stats.uptime_percentages[0]);
+      $('.uptimes .month').html(stats.uptime_percentages[1]);
     }
-    var last = sets.processing[sets.processing.length-1];
+    var last = stats.processing[stats.processing.length-1];
     if ( last ) this.favicon.badge( last[1] );
     setTimeout(this.fetchData, 5 * 60 * 1000);
   }

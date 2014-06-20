@@ -20,6 +20,7 @@ module Crowd
       def initialize
         @uptime  = []
         @latency = []
+        @available = true
         @cc = Hash.new{ | h, segment | h[segment] = Totals.create }
       end
 
@@ -28,9 +29,10 @@ module Crowd
       end
 
       def record_uptime(uptime)
+        @available = ( uptime['status'] != 2 )
         @uptime_percentages = uptime['customuptimeratio'].split('-')
         @uptime  = uptime['log'].map{ | event| [ uptime_ts(event['datetime']), event['type']=='2' ] }.sort_by(&:first)
-        @uptime.push( [Time.now.utc.to_i * 1000, uptime['status'] != 2] )
+        @uptime.push( [ Time.now.utc.to_i * 1000, @available ] )
         @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
       end
 
@@ -65,7 +67,7 @@ module Crowd
           record = at(job.updated_at).completed!
           record.failures! if job.failed?
         else
-          at(Time.now).processing!
+          at(start_at).processing!
         end
       end
 
@@ -83,25 +85,32 @@ module Crowd
       end
 
       def for_dashboard( stats )
-        stats.each_with_object({completed:[], started:[], processing:[], failures:[]}) do | kv, hash |
+        stats.each_with_object({completed:[], started:[], processing:[], failures:[]}){ | kv, hash |
           ts =  DateTime.strptime(kv.first.to_s,'%Y%m%d%H%M').to_i * 1000
           kv.last.to_h.each{ |key,count| hash[key].push([ts,count]) }
-        end
+        }.merge({
+            'available' => @available,
+            'uptime_percentages' => @uptime_percentages
+        })
       end
 
       def all
         for_dashboard(@cc).merge({
           'uptime' => @uptime,
-          'uptime_percentages' => @uptime_percentages,
-          'latency' => @latency,
+          'latency' => @latency
         })
       end
 
       def most_recent
-        ts = ts_for(Time.now)
+        latest = Time.now
+        loop do
+          ts = ts_for(latest)
+          break if @cc.has_key?(ts)
+          latest -= Crowd::Spotter::MINUTE_GRANULARITY.minutes
+        end
+        ts = ts_for(latest)
         for_dashboard( Hash[ts, @cc[ts]] ).merge({
           'uptime' => @uptime.last,
-          'uptime_percentages' => @uptime_percentages,
           'latency' => @latency.last
         })
       end
