@@ -28,7 +28,7 @@ Chart.prototype.draw = function(){
 };
 
 
-Charts = {
+Status = {
   default_options: {
     series: {
       lines: {
@@ -64,58 +64,33 @@ Charts = {
       plots: [
         { key: 'processing', label: 'Processing',color: "#cb4b4b" }
       ]
-    },{
-      id: 'uptime',
-      plots:[
-        { key: 'uptime', label: 'Uptime',color: "#5D8AA8", steps: true }
-      ],
-      options: {
-        series: {
-          lines: {
-            show: true,
-            steps: true
-          }
-        },
-        xaxis: {
-          mode: "time"
-        }
-      },
-      getLabel: function(date,y){
-        if (y){
-          return date + " UP";
-        } else {
-          return date + " DOWN";
-        }
-      }
-
     }
 
   ],
 
   charts: [],
 
-  boot: function(){
+  initialize: function(){
     _.bindAll(this,'fetchData','loadData','showError','fetchData','redraw','toolTip');
-    this.container = $('.charts');
-    this.container.on('click','button.retry', this.fetchData);
-
-    for (var i = 0, l = this.chart_plots.length; i < l; i++) {
-      this.chart_plots[i].options = ( this.chart_plots[i].options || {} );
-      _.defaults( this.chart_plots[i].options, this.default_options );
-      var chart = new Chart( this.chart_plots[i] );
-
-      this.charts.push(chart);
-
-      var div = this.container.find(".chart."+chart.id);
-      if ( div.length )
-        chart.element = div;
-      else
-        throw "Unable to find container for " + chart.id;
-    }
+    this.charts_container = $('.charts');
+    this.charts_container.on('click','button.retry', this.fetchData);
+    this.charts = _.map(this.chart_plots,this.createChart,this);
     this.fetchData('/statistics');
     $(window).on('resize', _.debounce(this.redraw,300) );
     this.favicon = new Favico({animation:'popFade'});
     $("body").on('plothover', this.toolTip);
+  },
+
+  createChart: function( definition ){
+    definition.options = ( definition.options || {} );
+    _.defaults( definition.options, this.default_options );
+    var chart = new Chart( definition );
+    var div = this.charts_container.find(".chart."+chart.id);
+    if ( div.length )
+      chart.element = div;
+    else
+      throw "Unable to find container for " + chart.id;
+    return chart;
   },
 
   toolTip: function (event, pos, item) {
@@ -160,7 +135,7 @@ Charts = {
   },
 
   showError: function(){
-    this.container.find('.error').show();
+    this.charts_container.find('.error').show();
   },
 
   loadData: function(sets){
@@ -172,19 +147,20 @@ Charts = {
       }
       chart.addData(data);
     }
-    this.container.find('.error').hide();
+    this.charts_container.find('.error').hide();
     if ( sets.uptime_percentages ) {
-      this.container.find('.uptime_percentages .7').html(sets.uptime_percentages[0]);
-      this.container.find('.uptime_percentages .30').html(sets.uptime_percentages[1]);
+      var available = sets.uptime[ sets.uptime.length-1 ][1];
+      $('.uptimes .current').html( available ? "available" : "unavailable" );
+      $('.uptimes .week').html(sets.uptime_percentages[0]);
+      $('.uptimes .month').html(sets.uptime_percentages[1]);
     }
     var last = sets.processing[sets.processing.length-1];
     if ( last ) this.favicon.badge( last[1] );
     setTimeout(this.fetchData, 5 * 60 * 1000);
-
   }
 
 };
 
 $(function() {
-  Charts.boot();
+  Status.initialize();
 });

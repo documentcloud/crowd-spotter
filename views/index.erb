@@ -7,24 +7,22 @@
     </head>
     <body>
         <h2>DocumentCloud Status</h2>
-        <p class="lead">This page contains status information about the performance of DocumentCloud's interval systems</p>
+        <div class="uptimes">Document Cloud is currently <span class="current"></span>, has been available for
+            <span class="week"></span> percent of the time for the last week, and
+            <span class="month"></span>% for the last 30 days.
+        </div>
         <h3>What do these graphs mean?</h3>
         <p>They provide a window into how well DocumentCloud is currently performing and how well we've done in the past</p>
         <div class="charts">
             <div class="tooltip"></div>
             <div class="error"><h1>Failed to load data.<button class="retry">Retry</button></h1></div>
 
-            <div class="uptime_percentages">Document Cloud has been available for
-                <span class="percent 7"></span> percent of the time for the last week, and
-                <span class="percent 30"></span>% for the last 30 days.
-            </div>
 
-            <p>Uptime Graph</p>
-            <div class="chart uptime"></div>
 
-            <p>Processing Count</p>
+            <h4>Processing Count</h4>
             <div class="chart processing"></div>
-            <p>Documents uploaded/completed over the past 24 hrs.</p>
+
+            <h4>Documents uploaded/completed over the past 24 hrs.</h4>
             <div class="chart activity"></div>
 
         </div>
