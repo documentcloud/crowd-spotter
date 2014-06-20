@@ -18,6 +18,9 @@ module Crowd
       @configuration ||= YAML.load(ERB.new(File.read("./config/config.yml")).result)
     end
 
+    def self.log( string )
+      puts string
+    end
   end
 end
 

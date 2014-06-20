@@ -9,7 +9,7 @@ module Crowd
         Gather.supervise_as :gather
 
         start_at = Time.now-(86400*1) # 86400 = 1 day
-        Celluloid::Actor[:gather].async.history(start_at,@buckets)
+        Celluloid::Actor[:gather].async.start_recording(start_at, @buckets)
       end
 
       def most_recent

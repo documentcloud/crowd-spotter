@@ -1,4 +1,5 @@
-require 'pry'
+module Crowd
+  module Spotter
 
 Totals = Struct.new(:completed, :started, :processing, :failures) do
   def self.create
@@ -30,7 +31,7 @@ class Buckets
   def record_uptime(uptime)
     @uptime_percentages = uptime['customuptimeratio'].split('-')
     @uptime  = uptime['log'].map{ | event| [ uptime_ts(event['datetime']), event['type']=='2' ] }.sort_by(&:first)
-    @uptime.push( [Time.now.utc.to_i * 1000, uptime['status']==2] )
+    @uptime.push( [Time.now.utc.to_i * 1000, uptime['status'] != 2] )
     @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
   end
 
@@ -42,15 +43,15 @@ class Buckets
     at(job.created_at).started!
 
     # increment the processing count for all periods that the job was processing
-    between( job.created_at, job.updated_at ) do | bucket |
-      bucket.processing!
+    timestamps_between(job.created_at, job.updated_at) do |ts|
+      at(ts).processing!
     end
   end
 
-  def between( start_time, end_time )
+  def timestamps_between(start_time, end_time)
     current = start_time
     loop do
-      yield at(current)
+      yield current
       break if (current += Crowd::Spotter::MINUTE_GRANULARITY.minutes) > end_time
     end
   end
@@ -106,4 +107,14 @@ class Buckets
     })
   end
 
+
+  def evict_data_between(start,cutoff)
+    timestamps_between(start,cutoff) do |ts|
+      @cc.delete( ts )
+    end
+  end
+
+end
+
+  end
 end

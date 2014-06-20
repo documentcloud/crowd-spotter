@@ -19,7 +19,7 @@ module Crowd
       end
 
 
-      def history(start_at, buckets)
+      def start_recording(start_at, buckets)
 
         @buckets = buckets
 
@@ -40,7 +40,7 @@ module Crowd
           end
         end
 
-        puts "History is available"
+        Crowd::Spotter.log "History is available"
 
         record_stats_since(last_run)
 
@@ -49,6 +49,11 @@ module Crowd
           count = record_stats_since(last_run)
           puts "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
           last_run =  started_at
+        end
+
+        every(1.hour) do
+          Crowd::Spotter.log "Evicting data older than #{1.day.ago}"
+          @buckets.evict_data_between(1.day.ago-2.hours, 1.day.ago)
         end
       end
 

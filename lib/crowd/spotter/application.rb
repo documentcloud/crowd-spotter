@@ -5,7 +5,6 @@ require 'sass'
 require 'compass'
 require 'jammit/sinatra'
 require 'jammit'
-require 'pry'
 
 module Crowd
   module Spotter
