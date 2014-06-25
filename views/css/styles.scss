@@ -1,35 +1,38 @@
-body {
-  .charts {
+@import "compass/css3";
 
-    /* .uptimes .current { */
-    /*   font-weight: bold; */
-    /*   background-color: yellow; */
-    /*   padding: 5px; */
-    /*   border-radius: 0 14px 2px 11px; */
-    /* } */
+body {
+  padding: 10px;
+  margin: 0px;
+  .header {
+    background: url(/images/background.jpg) repeat;
+    height: 50px;
+    margin: -10px -10px 10px -10px;
+    @include box-shadow(darkGrey 0 0 10px);
+
+    h2, img{
+      margin: 10px 0 0 10px;
+      display: inline;
+    }
+
+    h2 {
+      color: rgba(80, 80, 80, 1);
+    }
+    .indicator.down {
+      color: red;
+    }
 
     .error {
-      display: none;
-      h1{
-        text-align: center;
-        z-index: 2;
-        position: absolute;
-        background: rgba(0, 0, 0, 0.5);
-        height: 100%;
-        position: absolute;
-        width: 100%;
-        color: red;
-        display: inline-block;
-        padding: 20px;
-        border: 2px solid grey;
-        border-radius: 8px;
-        button {
-          display: block;
-          margin-left: auto;
-          margin-right: auto;
-        }
-      }
+      float: right;
+      border-left: 1px solid darkGrey;
+      border-bottom: 1px solid darkGrey;
+      padding: 5px;
+      font-style: italic;
+      font-size: 0.85em;
+      border-bottom-left-radius: 8px;
     }
+  }
+
+  .charts {
 
     .tooltip {
       position: absolute;

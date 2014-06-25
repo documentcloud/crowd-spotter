@@ -35,6 +35,9 @@ Status = {
         show: true
       }
     },
+    legend: {
+      position: 'nw'
+    },
     grid: {
       hoverable: true,
       clickable: true
@@ -71,7 +74,7 @@ Status = {
   initialize: function(){
     _.bindAll(this,'fetchData','loadData','showError','fetchData','redraw','toolTip');
     this.charts_container = $('.charts');
-    this.charts_container.on('click','button.retry', this.fetchData);
+    
     this.charts = _.map(this.chart_plots,this.createChart,this);
     this.fetchData('/statistics');
     $(window).on('resize', _.debounce(this.redraw,300) );
@@ -134,7 +137,8 @@ Status = {
   },
 
   showError: function(){
-    this.charts_container.find('.error').show();
+    $('.error').show();
+    setTimeout(this.fetchData, 30 * 1000);
   },
 
   loadData: function(stats){
@@ -146,15 +150,21 @@ Status = {
       }
       chart.addData(data);
     }
-    this.charts_container.find('.error').hide();
+    $('.error').hide();
     if ( stats.uptime_percentages ) {
-      $('.uptimes .current').html( stats.available ? "available" : "unavailable" );
+      $('.uptimes .current').html(stats.available ? "available" : "unavailable");
+      $('.header .indicator')
+        .toggleClass('down',!stats.available)
+        .html(stats.available ? "UP" : "DOWN");
+
       $('.uptimes .week').html(stats.uptime_percentages[0]);
       $('.uptimes .month').html(stats.uptime_percentages[1]);
     }
     var last = stats.processing[stats.processing.length-1];
     if ( last ) this.favicon.badge( last[1] );
     setTimeout(this.fetchData, 5 * 60 * 1000);
+
+
   }
 
 };
