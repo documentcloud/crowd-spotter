@@ -37,12 +37,12 @@ module Crowd
         erb :index
       end
 
-      get '/statistics' do
+      get '/statistics.json' do
         content_type 'application/json'
         Oj.dump(Spotter.statistics.all, mode: :compat)
       end
 
-      get '/statistics/most-recent' do
+      get '/statistics/most-recent.json' do
         content_type 'application/json'
         Oj.dump(Spotter.statistics.most_recent, mode: :compat)
       end

@@ -76,7 +76,7 @@ Status = {
     this.charts_container = $('.charts');
     
     this.charts = _.map(this.chart_plots,this.createChart,this);
-    this.fetchData('/statistics');
+    this.fetchData('/statistics.json');
     $(window).on('resize', _.debounce(this.redraw,300) );
     this.favicon = new Favico({animation:'popFade'});
     $("body").on('plothover', this.toolTip);
@@ -130,7 +130,7 @@ Status = {
 
   fetchData: function(url){
     if ( !_.isString(url) )
-      url = '/statistics/most-recent';
+      url = '/statistics/most-recent.json';
     $.get(url)
       .done( this.loadData )
       .fail( this.showError );
