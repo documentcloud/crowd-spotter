@@ -1,15 +1,14 @@
 require_relative 'buckets'
+require_relative 'supervisor'
+require 'celluloid/autostart'
+
 module Crowd
   module Spotter
     class Statistics
 
       def initialize
         @buckets = Buckets.new
-
-        Gather.supervise_as :gather
-
-        start_at = Time.now-(86400*1) # 86400 = 1 day
-        Celluloid::Actor[:gather].async.start_recording(start_at, @buckets)
+        Supervisor.new( @buckets ).startup
       end
 
       def most_recent

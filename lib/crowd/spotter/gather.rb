@@ -34,20 +34,14 @@ module Crowd
         end
 
         last_run = Time.now
-        with_connection do
-          CloudCrowd::Job.where("updated_at>?", start_at).order(:updated_at).find_each do | job |
-            @buckets.record_history_on(job)
-          end
-        end
-
-        Crowd::Spotter.log "History is available"
+        record_initial_data(start_at) if @buckets.empty?
 
         record_stats_since(last_run)
 
         every( Crowd::Spotter::MINUTE_GRANULARITY * 60) do
           started_at = Time.now
           count = record_stats_since(last_run)
-          puts "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
+          Spotter.log "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
           last_run =  started_at
         end
 
@@ -55,6 +49,15 @@ module Crowd
           Crowd::Spotter.log "Evicting data older than #{1.day.ago}"
           @buckets.evict_data_between(1.day.ago-2.hours, 1.day.ago)
         end
+      end
+
+      def record_initial_data(start_at)
+          with_connection do
+            CloudCrowd::Job.where("updated_at>?", start_at).order(:updated_at).find_each do | job |
+              @buckets.record_history_on(job)
+            end
+          end
+          Crowd::Spotter.log "Recorded initial history"
       end
 
       def record_stats_since(start_at)

@@ -36,6 +36,10 @@ module Crowd
         @latency = uptime['responsetime'].map{ |event| [ uptime_ts(event['datetime']), event['value'].to_i ] }.sort_by(&:first)
       end
 
+      def empty?
+        @cc.empty?
+      end
+
       def record_history_on(job)
         if job.complete?
           record = at(job.updated_at).completed!
