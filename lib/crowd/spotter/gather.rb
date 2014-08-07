@@ -1,11 +1,14 @@
 require 'celluloid'
 require 'cloud-crowd'
 require 'open-uri'
+require "active_support/core_ext"
 
 module Crowd
   module Spotter
     class Gather
       include Celluloid
+
+      DAYS_HISTORY = 3.day
 
       def initialize
       end
@@ -19,7 +22,8 @@ module Crowd
       end
 
 
-      def start_recording(start_at, buckets)
+      def start_recording(buckets)
+        start_at = DAYS_HISTORY.ago
 
         @buckets = buckets
 
@@ -46,15 +50,15 @@ module Crowd
         end
 
         every(1.hour) do
-          Crowd::Spotter.log "Evicting data older than #{1.day.ago}"
-          @buckets.evict_data_between(1.day.ago-2.hours, 1.day.ago)
+          Crowd::Spotter.log "Evicting data older than #{DAYS_HISTORY.ago}"
+          @buckets.evict_data_between(DAYS_HISTORY.ago-2.hours, DAYS_HISTORY.ago)
         end
       end
 
       def record_initial_data(start_at)
           with_connection do
             CloudCrowd::Job.where("updated_at>?", start_at).order(:updated_at).find_each do | job |
-              @buckets.record_history_on(job)
+              @buckets.record_history_on(job,start_at)
             end
           end
           Crowd::Spotter.log "Recorded initial history"

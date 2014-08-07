@@ -13,8 +13,7 @@ module Crowd
       def startup
         gather = Actor[:gather]
         link gather
-        start_at = Time.now-(86400*1)
-        gather.async.start_recording(start_at, @buckets)
+        gather.async.start_recording(@buckets)
       end
 
       def actor_died(actor, reason)

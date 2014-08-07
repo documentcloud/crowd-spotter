@@ -40,15 +40,15 @@ module Crowd
         @cc.empty?
       end
 
-      def record_history_on(job)
+      def record_history_on(job,start_at)
         if job.complete?
           record = at(job.updated_at).completed!
           record.failures! if job.failed?
         end
-        at(job.created_at).started!
+        at(job.created_at).started! unless job.created_at < start_at
 
         # increment the processing count for all periods that the job was processing
-        timestamps_between(job.created_at, job.updated_at) do |ts|
+        timestamps_between([job.created_at,start_at].max, job.updated_at) do |ts|
           at(ts).processing!
         end
       end
