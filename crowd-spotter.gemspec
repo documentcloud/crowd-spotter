@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "celluloid", "~>0.15.2"
   spec.add_dependency "sinatra", ">= 0.7.3"
   spec.add_dependency "oj"
+  spec.add_dependency "hashie"
   spec.add_dependency "jammit-sinatra"
 
 

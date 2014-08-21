@@ -1,6 +1,7 @@
 require_relative "spotter/version"
 require_relative "spotter/gather"
 require_relative "spotter/statistics"
+require 'hashie/mash'
 
 module Crowd
   module Spotter
@@ -15,7 +16,7 @@ module Crowd
     end
 
     def self.configuration
-      @configuration ||= YAML.load(ERB.new(File.read("./config/config.yml")).result)
+      @configuration ||= Hashie::Mash.new( YAML.load(ERB.new(File.read("./config/config.yml")).result) )
     end
 
     def self.log( string )
