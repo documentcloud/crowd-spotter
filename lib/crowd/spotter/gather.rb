@@ -29,6 +29,7 @@ module Crowd
 
         start_gathering_stats
         start_evicting_old_stats
+        start_event_monitoring
       end
 
       private
@@ -65,6 +66,24 @@ module Crowd
           end
         end
         count
+      end
+
+      def start_event_monitoring
+        every(1.minutes) do
+          latest = @buckets.most_recent
+          warnings = []
+          Spotter.configuration.alerts.each do | key, count |
+            current = latest[key.to_sym][0][1] # the data comes in as an array of arrays
+            if current > count
+              warnings << "#{key.titleize} count is currently at #{current}"
+            end
+          end
+          if warnings.any?
+            data = {:payload => {:text => "CloudCrowd: " + warnings.to_sentence,
+                :username => "docbot", :icon_emoji => ":doccloud:"}.to_json}
+            RestClient.post(Spotter.configuration.slack_hook_url, data)
+          end
+        end
       end
 
       def start_evicting_old_stats

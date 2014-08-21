@@ -11,3 +11,9 @@ database:
 uptime: 
   apiKey: m776152683-48dd47ea1fca7d9a96c7d64b
   monitorId: 776152683
+
+alerts:
+  processing: 200
+  failures: 20
+
+slack_hook_url: https://documentcloud.slack.com/services/hooks/incoming-webhook?token=XXXXXXXXXXXXXXXXXX
