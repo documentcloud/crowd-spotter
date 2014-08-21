@@ -10,18 +10,6 @@ module Crowd
 
       DAYS_HISTORY = 3.day
 
-      def initialize
-      end
-
-      def with_connection
-        ::CloudCrowd::Job.class_eval do
-          self.establish_connection( Spotter.configuration['database'] )
-          yield
-          self.remove_connection
-        end
-      end
-
-
       def start_recording(buckets)
         start_at = DAYS_HISTORY.ago
 
@@ -37,21 +25,19 @@ module Crowd
           end
         end
 
-        last_run = Time.now
         record_initial_data(start_at) if @buckets.empty?
 
-        record_stats_since(last_run)
+        start_gathering_stats
+        start_evicting_old_stats
+      end
 
-        every( Crowd::Spotter::MINUTE_GRANULARITY * 60) do
-          started_at = Time.now
-          count = record_stats_since(last_run)
-          Spotter.log "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
-          last_run =  started_at
-        end
+      private
 
-        every(1.hour) do
-          Crowd::Spotter.log "Evicting data older than #{DAYS_HISTORY.ago}"
-          @buckets.evict_data_between(DAYS_HISTORY.ago-2.hours, DAYS_HISTORY.ago)
+      def with_connection
+        ::CloudCrowd::Job.class_eval do
+          self.establish_connection( Spotter.configuration['database'] )
+          yield
+          self.remove_connection
         end
       end
 
@@ -81,6 +67,25 @@ module Crowd
         count
       end
 
+      def start_evicting_old_stats
+        last_eviction = Time.now
+        every(1.hour) do
+          Crowd::Spotter.log "Evicting data older than #{DAYS_HISTORY.ago}"
+          @buckets.evict_data_between(last_eviction-2.hours, last_eviction)
+          last_eviction += 1.hour
+        end
+      end
+
+      def start_gathering_stats
+        @last_run = Time.now
+        record_stats_since(@last_run)
+        every( Crowd::Spotter::MINUTE_GRANULARITY * 60) do
+          started_at = Time.now
+          count = record_stats_since(@last_run)
+          Spotter.log "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
+          @last_run =  started_at
+        end
+      end
 
     end
   end
