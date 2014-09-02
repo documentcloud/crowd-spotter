@@ -69,13 +69,21 @@ module Crowd
       end
 
       def start_event_monitoring
+        current_events = []
         every(5.minutes) do
           latest = @buckets.most_recent
           warnings = []
-          Spotter.configuration.alerts.each do | key, count |
+          Spotter.configuration.alerts.each do | key, max_count |
             current = latest[key.to_sym][0][1] # the data comes in as an array of arrays
-            if current > count
-              warnings << "#{key.titleize} count is currently at #{current}"
+            event_notified = current_events.include?(key)
+            if current > max_count
+              unless event_notified
+                current_events.push(key)
+                warnings << "#{key.titleize} count is currently at #{current}"
+              end
+            elsif event_notified
+              current_events.delete(key)
+              warnings << "#{key.titleize} count is below warning level at #{current}"
             end
           end
           if warnings.any?
