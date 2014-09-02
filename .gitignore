@@ -1,4 +1,6 @@
 .sass-cache
+log/spotter*.log
+tmp/spotter.pid
 config/config.yml
 public/assets
 *.gem
