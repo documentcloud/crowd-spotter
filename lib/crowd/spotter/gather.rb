@@ -26,7 +26,6 @@ module Crowd
         end
 
         record_initial_data(start_at) if @buckets.empty?
-
         start_gathering_stats
         start_evicting_old_stats
         start_event_monitoring
@@ -104,13 +103,12 @@ module Crowd
       end
 
       def start_gathering_stats
-        @last_run = Time.now
-        record_stats_since(@last_run)
-        every( Crowd::Spotter::MINUTE_GRANULARITY * 60) do
+        last_run = Time.now
+        every(Crowd::Spotter::MINUTE_GRANULARITY.minutes) do
           started_at = Time.now
-          count = record_stats_since(@last_run)
+          count = record_stats_since(last_run)
           Spotter.log "Recorded #{count} jobs since #{started_at} in #{Time.now-started_at} seconds"
-          @last_run =  started_at
+          last_run = started_at
         end
       end
 
