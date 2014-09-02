@@ -69,7 +69,7 @@ module Crowd
       end
 
       def start_event_monitoring
-        every(1.minutes) do
+        every(5.minutes) do
           latest = @buckets.most_recent
           warnings = []
           Spotter.configuration.alerts.each do | key, count |
