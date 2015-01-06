@@ -35,7 +35,7 @@ module Crowd
 
       def with_connection
         ::CloudCrowd::Job.class_eval do
-          self.establish_connection( Spotter.configuration['database'] )
+          self.establish_connection( Spotter.configuration['database'].to_h )
           yield
           self.remove_connection
         end
